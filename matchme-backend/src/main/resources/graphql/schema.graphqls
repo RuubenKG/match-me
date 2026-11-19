@@ -1,0 +1,163 @@
+type Query {
+    # Existing user queries
+    user(id: ID!): User
+    bio(id: ID!): Bio
+    profile(id: ID!): Profile
+    
+    # Context queries
+    me: User
+    myBio: Bio
+    myProfile: Profile
+    
+    # Matching features
+    recommendations(limit: Int, offset: Int, maxDistance: Int): [User!]!
+    connections: [User!]!
+    
+    # Connection management
+    incomingRequests: [User!]!
+    outgoingRequests: [User!]!
+    
+    # Chat features
+    chatList: [ChatSummary!]!
+    chatMessages(partnerId: ID!, page: Int, size: Int): [ChatMessage!]!
+    unreadCount: Int!
+    
+    # Movie/Actor features
+    searchMovies(query: String!): [Movie!]!
+    searchActors(query: String!): [Actor!]!
+    movieDetails(id: ID!): Movie
+    actorDetails(id: ID!): Actor
+}
+
+type Mutation {
+    # Auth
+    login(email: String!, password: String!): AuthResponse
+    logout: String
+    registerUser(input: UserRegistrationInput!): String
+    
+    # User Profile
+    updateMyProfile(input: ProfileUpdateInput!): User!
+    
+    # Chat mutations
+    sendMessage(recipientId: ID!, content: String!): ChatMessage!
+    markChatAsRead(partnerId: ID!): Boolean
+    
+    # Connection management
+    requestConnection(targetUserId: ID!): Boolean
+    acceptConnection(requesterId: ID!): Boolean
+    rejectConnection(requesterId: ID!): Boolean
+    dismissConnection(targetId: ID!): Boolean
+    
+    # Swipe actions
+    likeUser(targetUserId: ID!): MatchResult!
+    declineUser(targetUserId: ID!): MatchResult!
+    
+    # Legacy Support
+    updateBio(text: String!): Bio!
+}
+
+type Subscription {
+    newMessage: ChatMessage!
+}
+
+# --- Types ---
+
+type User {
+    id: ID!
+    username: String!
+    email: String
+    isOnline: Boolean!
+    lastSeen: String
+    bio: Bio
+    profile: Profile
+}
+
+type Bio {
+    id: ID!
+    text: String
+    interests: [String!]
+    user: User
+}
+
+type Profile {
+    id: ID!
+    firstName: String
+    lastName: String
+    location: String
+    latitude: Float
+    longitude: Float
+    profilePictureUrl: String
+    user: User
+}
+
+type ChatMessage {
+    id: ID!
+    content: String!
+    senderId: ID!
+    recipientId: ID!
+    timestamp: String!
+    isRead: Boolean!
+}
+
+type ChatSummary {
+    chatId: String!
+    participants: [ID!]!
+    lastMessage: String
+    updatedAt: String
+    unreadCount: Int!
+}
+
+type AuthResponse {
+    token: String!
+    userId: ID!
+}
+
+type MatchResult {
+    mutualMatch: Boolean!
+    message: String
+    matchId: ID
+    targetUserId: ID
+    chatId: String
+}
+
+type Movie {
+    id: ID!
+    title: String
+    overview: String
+    releaseDate: String
+    posterPath: String
+}
+
+type Actor {
+    id: ID!
+    name: String
+    biography: String
+    profilePath: String
+}
+
+# --- Inputs ---
+
+input UserRegistrationInput {
+    firstName: String!
+    lastName: String!
+    username: String!
+    email: String!
+    password: String!
+    dateOfBirth: String!
+}
+
+input ProfileUpdateInput {
+    firstName: String
+    lastName: String
+    username: String
+    email: String
+    bio: String
+    location: String
+    latitude: Float
+    longitude: Float
+    favoriteGenres: [String!]
+    dislikedGenres: [String!]
+    favoriteActors: [ID!]
+    favoriteDirectors: [ID!]
+    favoriteMovies: [ID!]
+}

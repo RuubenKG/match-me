@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:17
+    container_name: match-me-db-1
+    environment:
+      POSTGRES_DB: matchme
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Parool1
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./matchme-backend
+    container_name: matchme-backend
+    ports:
+      - "9090:9090"
+    depends_on:
+      - db
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    volumes:
+      - ./user-photos:/app/user-photos
+    command: [ "-d" ]
+
+  frontend:
+    build: ./matchme-frontend
+    container_name: matchme-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
